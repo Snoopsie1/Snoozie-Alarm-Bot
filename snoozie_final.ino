@@ -9,8 +9,9 @@
 #define playFeature D5
 // - - - - - - - - - - - - - - - - - - - - Props - - - - - - - - - - - - - - - - - - - -
 int motorSpeed = 750;
-int targetHour = 21;
-int targetMin = 55;
+int targetHour = 22;
+int targetMin = 34;
+boolean snoozieOn = false;
 const char *ssid     = ". . . . .";
 const char *password = ". . . . .";
 
@@ -91,23 +92,28 @@ void motorStop()
 // - - - - - - - - - - - - - - - - - - - - Loop - - - - - - - - - - - - - - - - - - - -
 void loop()
 {
-  timeClient.update();
-  if (timeClient.getHours() == targetHour && timeClient.getMinutes() == targetMin)
+  while (!snoozieOn)
   {
-    motorForward();
-    delay(1000);
-    motorReverse();
-    delay(1000);
-  }
-  else
-  {
-    motorStop();
+    timeClient.update();
     digitalWrite(LED_BUILTIN, HIGH);
     delay(1000);
     digitalWrite(LED_BUILTIN, LOW);
     Serial.print(timeClient.getHours());
     Serial.print(":");
     Serial.print(timeClient.getMinutes());
-    Serial.println("");
+    Serial.print(":");
+    Serial.println(timeClient.getSeconds());
+    if (timeClient.getHours() == targetHour && timeClient.getMinutes() == targetMin)
+    {
+      snoozieOn = true;
+    }
+  }
+
+  while(snoozieOn)
+  {
+    motorForward();
+    delay(1000);
+    motorReverse();
+    delay(1000);
   }
 }
